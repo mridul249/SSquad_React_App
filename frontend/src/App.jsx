@@ -25,6 +25,7 @@ function App() {
         theme="dark" // Optional: Set dark theme
       />
       <Routes>
+      <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

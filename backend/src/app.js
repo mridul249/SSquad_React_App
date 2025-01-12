@@ -45,7 +45,6 @@ app.use(session({
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
-
 // Error Handling Middleware
 app.use(errorHandler); // Ensure this is after all other middleware and routes
 
