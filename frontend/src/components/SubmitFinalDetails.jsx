@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "../axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -16,6 +16,28 @@ function SubmitFinalDetails() {
   const [loading, setLoading] = useState(false);
   const [currentSignupStep, setCurrentSignupStep] = useState(4);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userRes = await axios.get("/auth/user-info");
+        if (!userRes.data.success) {
+          toast.error("Unauthorized. Please login again.");
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error.response || error);
+        if (error.response?.status === 401) {
+          toast.error("Session expired. Please login again.");
+          navigate("/login");
+        } else {
+          toast.error("Failed to fetch user information.");
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, [navigate]);
 
   const handleSubmitFinalDetails = async (e) => {
     e.preventDefault();
@@ -38,24 +60,27 @@ function SubmitFinalDetails() {
 
       if (res.data.success) {
         toast.success(res.data.message);
-        const { currentSignupStep } = res.data;
-        if (currentSignupStep === 5) {
-          navigate("/dashboard");
-        } else {
-          navigate("/login");
-        }
+        navigate("/login");
       } else {
         toast.error(res.data.message || "Submission failed");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Submission failed");
+      if (error.response?.data?.errors) {
+        // Display each validation error as a toast
+        error.response.data.errors.forEach((err) => {
+          toast.error(err.msg);
+        });
+      } else {
+        // Generic error message
+        toast.error(error.response?.data?.message || "Submission failed");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/submit-business-info");
   };
 
   return (
@@ -63,12 +88,9 @@ function SubmitFinalDetails() {
       className="min-h-screen flex items-center justify-center bg-black px-4"
       style={{ padding: "2rem 0" }}
     >
-      {/* Outer Container */}
       <div
         className="flex flex-col lg:flex-row items-center justify-between w-full"
-        style={{
-          width: "60vw", // Adjusted width of the outer container
-        }}
+        style={{ width: "60vw" }}
       >
         {/* Title Section */}
         <div
@@ -77,9 +99,7 @@ function SubmitFinalDetails() {
         >
           <h1
             className="text-white font-bold"
-            style={{
-              fontSize: "clamp(2rem, 5vw, 6rem)", // Dynamic font size
-            }}
+            style={{ fontSize: "clamp(2rem, 5vw, 6rem)" }}
           >
             outgoingg
           </h1>
@@ -92,12 +112,12 @@ function SubmitFinalDetails() {
           style={{
             flex: "1",
             padding: "1.5rem",
-            backgroundColor: "#171717", // Background for the form
+            backgroundColor: "#171717",
             color: "white",
             borderRadius: "12px",
           }}
         >
-          {/* Top Bar: Back Icon and Progress Tracker */}
+          {/* Top Bar */}
           <div className="flex justify-between items-center mb-6">
             <button
               type="button"
@@ -112,7 +132,8 @@ function SubmitFinalDetails() {
                   key={step}
                   className="w-3 h-3 rounded-full"
                   style={{
-                    backgroundColor: currentSignupStep >= step ? "#29bc2f" : "#444",
+                    backgroundColor:
+                      currentSignupStep >= step ? "#29bc2f" : "#444",
                   }}
                 ></div>
               ))}
@@ -123,7 +144,7 @@ function SubmitFinalDetails() {
             Final Details
           </h2>
 
-          {/* Owner's Name */}
+          {/* Form Fields */}
           <div className="mb-4">
             <input
               type="text"
@@ -143,7 +164,6 @@ function SubmitFinalDetails() {
             </small>
           </div>
 
-          {/* PAN Number */}
           <div className="mb-4">
             <input
               type="text"
@@ -159,12 +179,9 @@ function SubmitFinalDetails() {
               required
               maxLength="10"
             />
-            <small className="block mt-1 text-sm text-gray-400">
-              PAN Number must be 10 characters
-            </small>
           </div>
 
-          {/* GST Number */}
+          {/* GST Details */}
           <div className="mb-4">
             <input
               type="text"

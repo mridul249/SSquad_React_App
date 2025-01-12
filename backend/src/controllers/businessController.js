@@ -81,8 +81,11 @@ const getBusinessInfo = async (req, res, next) => {
 
 const submitBusinessDocuments = async (req, res, next) => {
   try {
+    console.log('Received submitBusinessDocuments request body:', req.body);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
@@ -128,6 +131,7 @@ const submitBusinessDocuments = async (req, res, next) => {
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'PAN Number already exists.' });
     }
+    console.log('Error in submitBusinessDocuments:', error);
     next(error);
   }
 };

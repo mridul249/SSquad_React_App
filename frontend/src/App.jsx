@@ -1,40 +1,44 @@
-// src/App.jsx
-
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify"; // Import ToastContainer
+import "react-toastify/dist/ReactToastify.css"; // Import Toast styles
 import Login from "./components/Login";
 import Register from "./components/Register";
 import VerifyOTP from "./components/VerifyOTP";
 import SubmitBusinessInfo from "./components/SubmitBusinessInfo";
 import SubmitFinalDetails from "./components/SubmitFinalDetails";
-import Dashboard from "./components/Dashboard";
-import Customer from "./components/Customer"; // Assuming a Customer component exists
 import ProtectedRoute from "./components/ProtectedRoute";
-import Logout from "./components/Logout"; // Assuming a Logout component exists
-import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <Router>
-      <ToastContainer />
+      {/* Toast Container to display toast messages */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000} // Auto close after 3 seconds
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark" // Optional: Set dark theme
+      />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/verify-otp" element={<VerifyOTP />} />
-        <Route path="/submit-business-info" element={<SubmitBusinessInfo />} />
-        <Route path="/submit-final-details" element={<SubmitFinalDetails />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/customer" element={<Customer />} />
-        <Route path="/logout" element={<Logout />} />
-        <Route path="*" element={<Navigate to="/login" replace />} /> {/* Fallback Route */}
+
+        <Route path="/verify-otp" element={<ProtectedRoute requiredStep={2} />}>
+          <Route index element={<VerifyOTP />} />
+        </Route>
+
+        <Route path="/submit-business-info" element={<ProtectedRoute requiredStep={3} />}>
+          <Route index element={<SubmitBusinessInfo />} />
+        </Route>
+
+        <Route path="/submit-final-details" element={<ProtectedRoute requiredStep={4} />}>
+          <Route index element={<SubmitFinalDetails />} />
+        </Route>
       </Routes>
     </Router>
   );
